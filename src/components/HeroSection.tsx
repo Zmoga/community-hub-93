@@ -1,25 +1,37 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Users, Gamepad2, Copy, Check } from "lucide-react";
+import { usePlayerCount } from "@/hooks/usePlayerCount";
 
 const HeroSection = () => {
-  const [playerCount, setPlayerCount] = useState(47);
-  const [maxPlayers] = useState(128);
+  // You can replace this with your actual FiveM server ID/IP
+  const SERVER_IP = "norulespvp"; // Replace with your cfx.re server code
+  const { players, maxPlayers, online, loading } = usePlayerCount(SERVER_IP, 30000);
+  
+  const [displayPlayers, setDisplayPlayers] = useState(47);
   const [copied, setCopied] = useState(false);
   const serverIP = "connect cfx.re/join/norulespvp";
 
-  // Simulate live player count updates
+  // Use real data when available, otherwise show demo
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPlayerCount((prev) => {
-        const change = Math.floor(Math.random() * 5) - 2;
-        const newCount = prev + change;
-        return Math.max(10, Math.min(maxPlayers, newCount));
-      });
-    }, 5000);
+    if (!loading && online) {
+      setDisplayPlayers(players);
+    }
+  }, [players, loading, online]);
 
-    return () => clearInterval(interval);
-  }, [maxPlayers]);
+  // Simulate live player count updates when API is not available
+  useEffect(() => {
+    if (loading || !online) {
+      const interval = setInterval(() => {
+        setDisplayPlayers((prev) => {
+          const change = Math.floor(Math.random() * 5) - 2;
+          const newCount = prev + change;
+          return Math.max(10, Math.min(128, newCount));
+        });
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [loading, online]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(serverIP);
@@ -48,8 +60,10 @@ const HeroSection = () => {
         <div className="text-center max-w-4xl mx-auto">
           {/* Server Status Badge */}
           <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-8 glow-red-sm">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-sm font-medium text-muted-foreground">Server Online</span>
+            <span className={`w-2 h-2 rounded-full animate-pulse ${online ? 'bg-green-500' : 'bg-amber-500'}`} />
+            <span className="text-sm font-medium text-muted-foreground">
+              {loading ? 'Connecting...' : online ? 'Server Online' : 'Demo Mode'}
+            </span>
           </div>
 
           {/* Main Title */}
@@ -74,7 +88,7 @@ const HeroSection = () => {
                 <span className="text-sm text-muted-foreground">Players Online</span>
               </div>
               <div className="text-4xl font-bold font-['Orbitron'] text-primary text-glow">
-                {playerCount}
+                {displayPlayers}
                 <span className="text-lg text-muted-foreground">/{maxPlayers}</span>
               </div>
             </div>

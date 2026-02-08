@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { 
   Menu, 
-  Users, 
   Shield, 
   Home, 
   BookOpen, 
@@ -16,6 +15,7 @@ import {
   LogOut,
   Loader2
 } from "lucide-react";
+import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from "@/config/discord.config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,25 +29,10 @@ const Navbar = () => {
     { name: "Discord", href: "#discord", icon: MessageSquare },
   ];
 
-  const handleAdminClick = () => {
-    if (!user) {
-      signInWithDiscord();
-    } else if (isAdmin) {
-      navigate('/admin');
-    }
-  };
-
   const getRoleBadgeStyle = (role: string) => {
-    switch (role) {
-      case 'owner':
-        return 'bg-primary/20 text-primary border-primary/50';
-      case 'admin':
-        return 'bg-amber-500/20 text-amber-400 border-amber-500/50';
-      case 'developer':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
-      default:
-        return 'bg-muted text-muted-foreground border-border';
-    }
+    const display = ROLE_DISPLAY[role as AppRole];
+    if (!display) return 'bg-muted text-muted-foreground border-border';
+    return `${display.bgColor} ${display.color} ${display.borderColor}`;
   };
 
   return (

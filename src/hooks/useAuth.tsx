@@ -1,9 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
-
-type AppRole = Database['public']['Enums']['app_role'];
+import { hasAdminAccess, getPermissions, sortRolesByOrder, type AppRole } from '@/config/discord.config';
 
 interface AuthContextType {
   user: User | null;
@@ -11,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   roles: AppRole[];
   isAdmin: boolean;
+  permissions: ReturnType<typeof getPermissions>;
   profile: {
     discord_username?: string;
     discord_avatar?: string;
@@ -30,7 +29,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
 
-  const isAdmin = roles.some(r => ['owner', 'admin', 'developer'].includes(r));
+  // Calculate derived values
+  const isAdmin = hasAdminAccess(roles);
+  const permissions = getPermissions(roles);
 
   const syncRoles = async () => {
     if (!session?.access_token) return;
@@ -43,7 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (response.data) {
-        setRoles(response.data.roles || []);
+        // Use sorted roles from the config
+        const sortedRoles = sortRolesByOrder(response.data.roles || []);
+        setRoles(sortedRoles);
         setProfile(response.data.profile || null);
       }
     } catch (error) {
@@ -87,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: window.location.origin,
+        redirectTo: `${window.location.origin}/admin`,
         scopes: 'identify guilds guilds.members.read',
       },
     });
@@ -116,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         roles,
         isAdmin,
+        permissions,
         profile,
         signInWithDiscord,
         signOut,

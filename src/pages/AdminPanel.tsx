@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -14,24 +14,87 @@ import {
   Server,
   LogOut,
   Home,
-  AlertTriangle
+  AlertTriangle,
+  FileText,
+  Loader2
 } from 'lucide-react';
+import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from '@/config/discord.config';
+import { BanPlayerDialog, KickPlayerDialog, WarnPlayerDialog, UnbanPlayerDialog } from '@/components/admin/ModerationDialogs';
+import { RoleManager } from '@/components/admin/RoleManager';
+import { supabase } from '@/integrations/supabase/client';
 
 const AdminPanel = () => {
-  const { user, isAdmin, roles, profile, signOut, loading } = useAuth();
+  const { user, isAdmin, roles, permissions, profile, signInWithDiscord, signOut, loading } = useAuth();
   const navigate = useNavigate();
+  const [staffMembers, setStaffMembers] = useState<any[]>([]);
+  const [loadingStaff, setLoadingStaff] = useState(false);
 
+  // Fetch staff members for role management
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/');
+    if (isAdmin && permissions.canManageRoles) {
+      fetchStaffMembers();
     }
-  }, [user, loading, navigate]);
+  }, [isAdmin, permissions.canManageRoles]);
+
+  const fetchStaffMembers = async () => {
+    setLoadingStaff(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        setStaffMembers(data);
+      }
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+    } finally {
+      setLoadingStaff(false);
+    }
+  };
+
+  // Show login screen if not authenticated
+  if (!loading && !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="glass max-w-md w-full">
+          <CardHeader className="text-center">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-lg gradient-red flex items-center justify-center glow-red">
+              <Shield className="w-10 h-10 text-primary-foreground" />
+            </div>
+            <CardTitle className="text-2xl font-['Orbitron']">Admin Panel</CardTitle>
+            <CardDescription>
+              Sign in with Discord to access the NoRulesPvP admin panel.
+              You need an admin role to access this area.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            <Button 
+              onClick={signInWithDiscord} 
+              className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
+              size="lg"
+            >
+              <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+              </svg>
+              Sign in with Discord
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline" className="w-full">
+              <Home className="w-4 h-4 mr-2" />
+              Return Home
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <Loader2 className="w-16 h-16 animate-spin text-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -49,7 +112,7 @@ const AdminPanel = () => {
             <CardTitle className="text-2xl font-['Orbitron'] text-destructive">Access Denied</CardTitle>
             <CardDescription>
               You don't have permission to access the admin panel. 
-              Contact a server owner to get admin, developer, or owner role.
+              Contact a server owner to get a staff role.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
@@ -81,19 +144,44 @@ const AdminPanel = () => {
     { action: 'Unban', target: 'ReformedPlayer', by: 'BloodKing', time: '1 hour ago' },
   ];
 
-  const getRoleBadgeStyle = (role: string) => {
-    switch (role) {
-      case 'owner':
-        return 'bg-primary/20 text-primary border-primary/50';
-      case 'admin':
-        return 'bg-amber-500/20 text-amber-400 border-amber-500/50';
-      case 'developer':
-        return 'bg-purple-500/20 text-purple-400 border-purple-500/50';
-      case 'moderator':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-      default:
-        return 'bg-muted text-muted-foreground border-border';
-    }
+  const getRoleBadgeClasses = (role: string) => {
+    const display = ROLE_DISPLAY[role as AppRole];
+    if (!display) return 'bg-muted text-muted-foreground border-border';
+    return `${display.bgColor} ${display.color} ${display.borderColor}`;
+  };
+
+  // Moderation handlers (these would connect to your FiveM server API)
+  const handleBan = async (data: { playerId: string; reason: string; duration: string }) => {
+    console.log('Banning player:', data);
+    // TODO: Connect to FiveM server API
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleKick = async (data: { playerId: string; reason: string }) => {
+    console.log('Kicking player:', data);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleWarn = async (data: { playerId: string; reason: string; severity: string }) => {
+    console.log('Warning player:', data);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleUnban = async (data: { playerId: string; reason: string }) => {
+    console.log('Unbanning player:', data);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  };
+
+  const handleAssignRole = async (userId: string, role: AppRole) => {
+    console.log('Assigning role:', userId, role);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await fetchStaffMembers();
+  };
+
+  const handleRemoveRole = async (userId: string, role: AppRole) => {
+    console.log('Removing role:', userId, role);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await fetchStaffMembers();
   };
 
   return (
@@ -127,16 +215,21 @@ const AdminPanel = () => {
                 </Avatar>
                 <div className="hidden sm:block">
                   <p className="text-sm font-medium">{profile?.discord_username || 'Admin'}</p>
-                  <div className="flex gap-1">
-                    {roles.map((role) => (
+                  <div className="flex gap-1 flex-wrap max-w-[200px]">
+                    {ROLES_ORDER.filter(r => roles.includes(r)).slice(0, 2).map((role) => (
                       <Badge 
                         key={role} 
                         variant="outline" 
-                        className={`text-xs capitalize ${getRoleBadgeStyle(role)}`}
+                        className={`text-xs ${getRoleBadgeClasses(role)}`}
                       >
-                        {role}
+                        {ROLE_DISPLAY[role].icon} {ROLE_DISPLAY[role].label}
                       </Badge>
                     ))}
+                    {roles.length > 2 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{roles.length - 2}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -177,25 +270,43 @@ const AdminPanel = () => {
                 <Settings className="w-5 h-5" />
                 Quick Actions
               </CardTitle>
+              <CardDescription>
+                Your permissions: {Object.entries(permissions).filter(([, v]) => v).length} actions available
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start gradient-red hover:opacity-90" size="lg">
-                <Ban className="w-4 h-4 mr-2" />
-                Ban Player
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="lg">
-                <Users className="w-4 h-4 mr-2" />
-                View Players
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="lg">
-                <Shield className="w-4 h-4 mr-2" />
-                Manage Roles
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="lg">
-                <Activity className="w-4 h-4 mr-2" />
-                Server Logs
-              </Button>
-              <Button className="w-full justify-start" variant="outline" size="lg">
+              <BanPlayerDialog onBan={handleBan} disabled={!permissions.canBanPlayers} />
+              <KickPlayerDialog onKick={handleKick} disabled={!permissions.canKickPlayers} />
+              <WarnPlayerDialog onWarn={handleWarn} disabled={!permissions.canWarnPlayers} />
+              <UnbanPlayerDialog onUnban={handleUnban} disabled={!permissions.canBanPlayers} />
+              
+              <div className="pt-2 border-t border-border/30">
+                <RoleManager 
+                  currentRoles={staffMembers}
+                  onAssignRole={handleAssignRole}
+                  onRemoveRole={handleRemoveRole}
+                  disabled={!permissions.canManageRoles}
+                />
+              </div>
+
+              <div className="pt-2 border-t border-border/30">
+                <Button 
+                  className="w-full justify-start" 
+                  variant="outline" 
+                  size="lg"
+                  disabled={!permissions.canViewLogs}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  Server Logs
+                </Button>
+              </div>
+
+              <Button 
+                className="w-full justify-start" 
+                variant="outline" 
+                size="lg"
+                disabled={!permissions.canManageServer}
+              >
                 <Server className="w-4 h-4 mr-2" />
                 Server Settings
               </Button>

@@ -6,14 +6,36 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Discord role IDs that map to our app roles
-// These should be configured in secrets or fetched from Discord
-const ROLE_MAPPINGS: Record<string, string> = {
-  // These are example Discord role IDs - they should be configured per server
-  'owner': 'OWNER_ROLE_ID',
-  'admin': 'ADMIN_ROLE_ID', 
-  'developer': 'DEVELOPER_ROLE_ID',
-  'moderator': 'MODERATOR_ROLE_ID',
+// ============================================
+// DISCORD ROLE CONFIGURATION
+// Edit these values to match your Discord server
+// ============================================
+const DISCORD_CONFIG = {
+  // Role display order (highest to lowest)
+  ROLES_ORDER: [
+    'owner',
+    'team_lead',
+    'main_admin', 
+    'admin',
+    'developer',
+    'moderator',
+    'member',
+  ],
+
+  // Discord Role ID -> App Role mapping
+  // Replace with your actual Discord role IDs
+  ROLE_IDS: {
+    '477': 'owner',
+    '478': 'team_lead',
+    '479': 'main_admin',
+    '480': 'admin',
+    '481': 'developer',
+    '482': 'moderator',
+    '483': 'member',
+  } as Record<string, string>,
+
+  // Roles that can access admin panel
+  ADMIN_ROLES: ['owner', 'team_lead', 'main_admin', 'admin', 'developer', 'moderator'],
 };
 
 serve(async (req) => {
@@ -81,14 +103,31 @@ serve(async (req) => {
       console.error('Error updating profile:', profileError);
     }
 
+    // Get roles and sort them by display order
     const roles = userRoles?.map(r => r.role) || [];
+    const sortedRoles = DISCORD_CONFIG.ROLES_ORDER.filter(role => 
+      roles.includes(role as any)
+    );
+
+    // Check if user has admin access
+    const isAdmin = roles.some(r => 
+      DISCORD_CONFIG.ADMIN_ROLES.includes(r as string)
+    );
+
+    // Get highest role
+    const highestRole = sortedRoles.length > 0 ? sortedRoles[0] : null;
 
     return new Response(
       JSON.stringify({
         success: true,
         discordId,
-        roles,
-        isAdmin: roles.some(r => ['owner', 'admin', 'developer'].includes(r)),
+        roles: sortedRoles,
+        highestRole,
+        isAdmin,
+        config: {
+          rolesOrder: DISCORD_CONFIG.ROLES_ORDER,
+          adminRoles: DISCORD_CONFIG.ADMIN_ROLES,
+        },
         profile: {
           discord_username: user.user_metadata?.full_name,
           discord_avatar: user.user_metadata?.avatar_url,

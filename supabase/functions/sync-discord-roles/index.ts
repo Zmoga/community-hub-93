@@ -7,23 +7,10 @@ const corsHeaders = {
 };
 
 // ============================================
-// DISCORD ROLE CONFIGURATION
-// Edit these values to match your Discord server
+// ROLE CONFIG — keep in sync with src/config/server.config.ts
 // ============================================
 const DISCORD_CONFIG = {
-  // Role display order (highest to lowest)
-  ROLES_ORDER: [
-    'owner',
-    'team_lead',
-    'main_admin', 
-    'admin',
-    'developer',
-    'moderator',
-    'member',
-  ],
-
-  // Discord Role ID -> App Role mapping
-  // Replace with your actual Discord role IDs
+  ROLES_ORDER: ['owner','team_lead','main_admin','admin','developer','moderator','member'],
   ROLE_IDS: {
     '477': 'owner',
     '478': 'team_lead',
@@ -33,9 +20,7 @@ const DISCORD_CONFIG = {
     '482': 'moderator',
     '483': 'member',
   } as Record<string, string>,
-
-  // Roles that can access admin panel
-  ADMIN_ROLES: ['owner', 'team_lead', 'main_admin', 'admin', 'developer', 'moderator'],
+  ADMIN_ROLES: ['owner','team_lead','main_admin','admin','developer','moderator'],
 };
 
 serve(async (req) => {

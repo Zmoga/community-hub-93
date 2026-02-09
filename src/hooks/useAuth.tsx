@@ -1,7 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { hasAdminAccess, getPermissions, sortRolesByOrder, type AppRole } from '@/config/discord.config';
+import { hasAdminAccess, getPermissions, sortRolesByOrder, DISCORD_AUTH_CONFIG, type AppRole } from '@/config/server.config';
 
 interface AuthContextType {
   user: User | null;
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
-        redirectTo: `${window.location.origin}/admin`,
+        redirectTo: `${window.location.origin}${DISCORD_AUTH_CONFIG.REDIRECT_PATH}`,
         scopes: 'identify guilds guilds.members.read',
       },
     });

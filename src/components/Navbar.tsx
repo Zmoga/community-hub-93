@@ -15,7 +15,7 @@ import {
   LogOut,
   Loader2
 } from "lucide-react";
-import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from "@/config/discord.config";
+import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from "@/config/server.config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);

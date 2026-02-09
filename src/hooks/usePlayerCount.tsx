@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { FIVEM_CONFIG } from '@/config/server.config';
 
 interface PlayerCountData {
   players: number;
@@ -9,10 +10,13 @@ interface PlayerCountData {
   error?: string;
 }
 
-export function usePlayerCount(serverIp: string, refreshInterval = 30000) {
+export function usePlayerCount(
+  serverIp: string = FIVEM_CONFIG.SERVER_CODE,
+  refreshInterval: number = FIVEM_CONFIG.REFRESH_INTERVAL
+) {
   const [data, setData] = useState<PlayerCountData>({
     players: 0,
-    maxPlayers: 128,
+    maxPlayers: FIVEM_CONFIG.DEFAULT_MAX_PLAYERS,
     online: false,
   });
   const [loading, setLoading] = useState(true);
@@ -36,10 +40,8 @@ export function usePlayerCount(serverIp: string, refreshInterval = 30000) {
 
   useEffect(() => {
     fetchPlayerCount();
-    
-    const interval = setInterval(fetchPlayerCount, refreshInterval);
-    
-    return () => clearInterval(interval);
+    const id = setInterval(fetchPlayerCount, refreshInterval);
+    return () => clearInterval(id);
   }, [serverIp, refreshInterval]);
 
   return { ...data, loading, refetch: fetchPlayerCount };

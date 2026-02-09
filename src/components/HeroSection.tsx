@@ -2,15 +2,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Users, Gamepad2, Copy, Check } from "lucide-react";
 import { usePlayerCount } from "@/hooks/usePlayerCount";
+import { FIVEM_CONFIG, DISCORD_AUTH_CONFIG } from "@/config/server.config";
 
 const HeroSection = () => {
-  // You can replace this with your actual FiveM server ID/IP
-  const SERVER_IP = "norulespvp"; // Replace with your cfx.re server code
-  const { players, maxPlayers, online, loading } = usePlayerCount(SERVER_IP, 30000);
+  const { players, maxPlayers, online, loading } = usePlayerCount(
+    FIVEM_CONFIG.SERVER_CODE,
+    FIVEM_CONFIG.REFRESH_INTERVAL
+  );
   
   const [displayPlayers, setDisplayPlayers] = useState(47);
   const [copied, setCopied] = useState(false);
-  const serverIP = "connect cfx.re/join/norulespvp";
+  const serverIP = FIVEM_CONFIG.CONNECT_STRING;
 
   // Use real data when available, otherwise show demo
   useEffect(() => {

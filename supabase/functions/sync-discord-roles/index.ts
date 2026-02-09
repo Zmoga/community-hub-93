@@ -10,17 +10,17 @@ const corsHeaders = {
 // ROLE CONFIG — keep in sync with src/config/server.config.ts
 // ============================================
 const DISCORD_CONFIG = {
-  ROLES_ORDER: ['owner','team_lead','main_admin','admin','developer','moderator','member'],
+  ROLES_ORDER: ['owner','developer','team_lead','main_admin','admin','moderator','member'],
   ROLE_IDS: {
-    '477': 'owner',
-    '478': 'team_lead',
-    '479': 'main_admin',
-    '480': 'admin',
-    '481': 'developer',
-    '482': 'moderator',
-    '483': 'member',
+    'Discord.Owner': 'owner',
+    'Discord.Developer': 'developer',
+    'Discord.TeamLead': 'team_lead',
+    'Discord.MainAdmin': 'main_admin',
+    'Discord.Admin': 'admin',
+    'Discord.Moderator': 'moderator',
+    'Discord.Player': 'member',
   } as Record<string, string>,
-  ADMIN_ROLES: ['owner','team_lead','main_admin','admin','developer','moderator'],
+  ADMIN_ROLES: ['owner','developer','team_lead','main_admin','admin','moderator'],
 };
 
 serve(async (req) => {

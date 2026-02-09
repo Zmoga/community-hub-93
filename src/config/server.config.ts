@@ -49,10 +49,10 @@ export const DISCORD_AUTH_CONFIG = {
 // ============================================
 export const ROLES_ORDER = [
   'owner',
+  'developer',
   'team_lead',
   'main_admin',
   'admin',
-  'developer',
   'moderator',
   'member',
 ] as const;
@@ -61,16 +61,16 @@ export type AppRole = typeof ROLES_ORDER[number];
 
 // ============================================
 // 4. DISCORD ROLE IDS
-// Replace with your actual Discord role IDs
+// Format: Discord.<RoleName> — replace with your real Discord role IDs
 // ============================================
 export const DISCORD_ROLE_IDS: Record<AppRole, string> = {
-  owner: '477',
-  team_lead: '478',
-  main_admin: '479',
-  admin: '480',
-  developer: '481',
-  moderator: '482',
-  member: '483',
+  owner: 'Discord.Owner',
+  developer: 'Discord.Developer',
+  team_lead: 'Discord.TeamLead',
+  main_admin: 'Discord.MainAdmin',
+  admin: 'Discord.Admin',
+  moderator: 'Discord.Moderator',
+  member: 'Discord.Player',
 };
 
 /** Reverse mapping: Discord ID → App Role */
@@ -98,6 +98,13 @@ export const ROLE_DISPLAY: Record<AppRole, {
     borderColor: 'border-red-500/50',
     icon: '👑',
   },
+  developer: {
+    label: 'Developer',
+    color: 'text-purple-400',
+    bgColor: 'bg-purple-500/20',
+    borderColor: 'border-purple-500/50',
+    icon: '💻',
+  },
   team_lead: {
     label: 'Team Lead',
     color: 'text-orange-400',
@@ -119,13 +126,6 @@ export const ROLE_DISPLAY: Record<AppRole, {
     borderColor: 'border-yellow-500/50',
     icon: '⚔️',
   },
-  developer: {
-    label: 'Developer',
-    color: 'text-purple-400',
-    bgColor: 'bg-purple-500/20',
-    borderColor: 'border-purple-500/50',
-    icon: '💻',
-  },
   moderator: {
     label: 'Moderator',
     color: 'text-blue-400',
@@ -134,7 +134,7 @@ export const ROLE_DISPLAY: Record<AppRole, {
     icon: '🔧',
   },
   member: {
-    label: 'Member',
+    label: 'Player',
     color: 'text-gray-400',
     bgColor: 'bg-gray-500/20',
     borderColor: 'border-gray-500/50',
@@ -160,6 +160,11 @@ export const ROLE_PERMISSIONS: Record<AppRole, {
     canWarnPlayers: true, canManageRoles: true, canViewLogs: true,
     canManageServer: true, canEditConfig: true,
   },
+  developer: {
+    canAccessAdmin: true, canBanPlayers: false, canKickPlayers: false,
+    canWarnPlayers: false, canManageRoles: false, canViewLogs: true,
+    canManageServer: true, canEditConfig: true,
+  },
   team_lead: {
     canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
     canWarnPlayers: true, canManageRoles: true, canViewLogs: true,
@@ -174,11 +179,6 @@ export const ROLE_PERMISSIONS: Record<AppRole, {
     canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
     canWarnPlayers: true, canManageRoles: false, canViewLogs: true,
     canManageServer: false, canEditConfig: false,
-  },
-  developer: {
-    canAccessAdmin: true, canBanPlayers: false, canKickPlayers: false,
-    canWarnPlayers: false, canManageRoles: false, canViewLogs: true,
-    canManageServer: true, canEditConfig: true,
   },
   moderator: {
     canAccessAdmin: true, canBanPlayers: false, canKickPlayers: true,

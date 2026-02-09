@@ -1,19 +1,55 @@
 /**
- * Discord Role Configuration
- * 
- * This config maps Discord role IDs to application roles and defines the display order.
- * To add new roles:
- * 1. Add the role name to ROLES_ORDER array (determines display priority)
- * 2. Add the Discord role ID to DISCORD_ROLE_IDS object
- * 3. Define permissions in ROLE_PERMISSIONS
+ * ====================================================
+ * MAIN SERVER CONFIGURATION
+ * ====================================================
+ * Edit this single file to configure:
+ *  - FiveM Server connection & player count
+ *  - Discord OAuth & login settings
+ *  - Role hierarchy, IDs, permissions & display
+ *  - Admin panel access rules
+ * ====================================================
  */
 
 // ============================================
-// ROLE DISPLAY ORDER (highest to lowest rank)
+// 1. FIVEM SERVER
+// ============================================
+export const FIVEM_CONFIG = {
+  /** cfx.re server code (the part after cfx.re/join/) */
+  SERVER_CODE: 'norulespvp',
+
+  /** Connect string shown to users */
+  CONNECT_STRING: 'connect cfx.re/join/norulespvp',
+
+  /** How often to refresh player count (ms) */
+  REFRESH_INTERVAL: 30_000,
+
+  /** Default max players shown while loading */
+  DEFAULT_MAX_PLAYERS: 128,
+};
+
+// ============================================
+// 2. DISCORD / AUTH
+// ============================================
+export const DISCORD_AUTH_CONFIG = {
+  /** Your Discord server (guild) ID */
+  GUILD_ID: 'YOUR_DISCORD_SERVER_ID',
+
+  /** Public invite link */
+  INVITE_URL: 'https://discord.gg/norulespvp',
+
+  /** OAuth scopes needed for login */
+  OAUTH_SCOPES: ['identify', 'guilds', 'guilds.members.read'],
+
+  /** Where to redirect after login */
+  REDIRECT_PATH: '/admin',
+};
+
+// ============================================
+// 3. ROLE HIERARCHY (highest → lowest)
 // ============================================
 export const ROLES_ORDER = [
   'owner',
-  'team_lead', 
+  'team_lead',
   'main_admin',
   'admin',
   'developer',
@@ -24,20 +60,20 @@ export const ROLES_ORDER = [
 export type AppRole = typeof ROLES_ORDER[number];
 
 // ============================================
-// DISCORD ROLE IDS
-// Replace these with your actual Discord role IDs
+// 4. DISCORD ROLE IDS
+// Replace with your actual Discord role IDs
 // ============================================
 export const DISCORD_ROLE_IDS: Record<AppRole, string> = {
-  owner: '477',           // Owner role ID
-  team_lead: '478',       // Team Lead role ID
-  main_admin: '479',      // Main Admin role ID
-  admin: '480',           // Admin role ID
-  developer: '481',       // Developer role ID
-  moderator: '482',       // Moderator role ID
-  member: '483',          // Member role ID
+  owner: '477',
+  team_lead: '478',
+  main_admin: '479',
+  admin: '480',
+  developer: '481',
+  moderator: '482',
+  member: '483',
 };
 
-// Reverse mapping: Discord ID -> App Role
+/** Reverse mapping: Discord ID → App Role */
 export const DISCORD_ID_TO_ROLE: Record<string, AppRole> = Object.entries(
   DISCORD_ROLE_IDS
 ).reduce((acc, [role, id]) => {
@@ -46,14 +82,14 @@ export const DISCORD_ID_TO_ROLE: Record<string, AppRole> = Object.entries(
 }, {} as Record<string, AppRole>);
 
 // ============================================
-// ROLE DISPLAY CONFIGURATION
+// 5. ROLE DISPLAY (badges, colors, icons)
 // ============================================
 export const ROLE_DISPLAY: Record<AppRole, {
   label: string;
   color: string;
   bgColor: string;
   borderColor: string;
-  icon?: string;
+  icon: string;
 }> = {
   owner: {
     label: 'Owner',
@@ -107,7 +143,7 @@ export const ROLE_DISPLAY: Record<AppRole, {
 };
 
 // ============================================
-// ROLE PERMISSIONS
+// 6. ROLE PERMISSIONS
 // ============================================
 export const ROLE_PERMISSIONS: Record<AppRole, {
   canAccessAdmin: boolean;
@@ -120,130 +156,75 @@ export const ROLE_PERMISSIONS: Record<AppRole, {
   canEditConfig: boolean;
 }> = {
   owner: {
-    canAccessAdmin: true,
-    canBanPlayers: true,
-    canKickPlayers: true,
-    canWarnPlayers: true,
-    canManageRoles: true,
-    canViewLogs: true,
-    canManageServer: true,
-    canEditConfig: true,
+    canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
+    canWarnPlayers: true, canManageRoles: true, canViewLogs: true,
+    canManageServer: true, canEditConfig: true,
   },
   team_lead: {
-    canAccessAdmin: true,
-    canBanPlayers: true,
-    canKickPlayers: true,
-    canWarnPlayers: true,
-    canManageRoles: true,
-    canViewLogs: true,
-    canManageServer: true,
-    canEditConfig: false,
+    canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
+    canWarnPlayers: true, canManageRoles: true, canViewLogs: true,
+    canManageServer: true, canEditConfig: false,
   },
   main_admin: {
-    canAccessAdmin: true,
-    canBanPlayers: true,
-    canKickPlayers: true,
-    canWarnPlayers: true,
-    canManageRoles: false,
-    canViewLogs: true,
-    canManageServer: false,
-    canEditConfig: false,
+    canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
+    canWarnPlayers: true, canManageRoles: false, canViewLogs: true,
+    canManageServer: false, canEditConfig: false,
   },
   admin: {
-    canAccessAdmin: true,
-    canBanPlayers: true,
-    canKickPlayers: true,
-    canWarnPlayers: true,
-    canManageRoles: false,
-    canViewLogs: true,
-    canManageServer: false,
-    canEditConfig: false,
+    canAccessAdmin: true, canBanPlayers: true, canKickPlayers: true,
+    canWarnPlayers: true, canManageRoles: false, canViewLogs: true,
+    canManageServer: false, canEditConfig: false,
   },
   developer: {
-    canAccessAdmin: true,
-    canBanPlayers: false,
-    canKickPlayers: false,
-    canWarnPlayers: false,
-    canManageRoles: false,
-    canViewLogs: true,
-    canManageServer: true,
-    canEditConfig: true,
+    canAccessAdmin: true, canBanPlayers: false, canKickPlayers: false,
+    canWarnPlayers: false, canManageRoles: false, canViewLogs: true,
+    canManageServer: true, canEditConfig: true,
   },
   moderator: {
-    canAccessAdmin: true,
-    canBanPlayers: false,
-    canKickPlayers: true,
-    canWarnPlayers: true,
-    canManageRoles: false,
-    canViewLogs: true,
-    canManageServer: false,
-    canEditConfig: false,
+    canAccessAdmin: true, canBanPlayers: false, canKickPlayers: true,
+    canWarnPlayers: true, canManageRoles: false, canViewLogs: true,
+    canManageServer: false, canEditConfig: false,
   },
   member: {
-    canAccessAdmin: false,
-    canBanPlayers: false,
-    canKickPlayers: false,
-    canWarnPlayers: false,
-    canManageRoles: false,
-    canViewLogs: false,
-    canManageServer: false,
-    canEditConfig: false,
+    canAccessAdmin: false, canBanPlayers: false, canKickPlayers: false,
+    canWarnPlayers: false, canManageRoles: false, canViewLogs: false,
+    canManageServer: false, canEditConfig: false,
   },
 };
 
 // ============================================
-// HELPER FUNCTIONS
+// 7. HELPER FUNCTIONS
 // ============================================
 
-/**
- * Get sorted roles by their display order
- */
 export function sortRolesByOrder(roles: string[]): AppRole[] {
   return ROLES_ORDER.filter(role => roles.includes(role));
 }
 
-/**
- * Get the highest role from a list of roles
- */
 export function getHighestRole(roles: string[]): AppRole | null {
   const sorted = sortRolesByOrder(roles);
   return sorted.length > 0 ? sorted[0] : null;
 }
 
-/**
- * Check if user has admin access (any role that can access admin panel)
- */
 export function hasAdminAccess(roles: string[]): boolean {
-  return roles.some(role => 
+  return roles.some(role =>
     ROLE_PERMISSIONS[role as AppRole]?.canAccessAdmin ?? false
   );
 }
 
-/**
- * Check if user has a specific permission
- */
 export function hasPermission(
-  roles: string[], 
+  roles: string[],
   permission: keyof typeof ROLE_PERMISSIONS[AppRole]
 ): boolean {
-  return roles.some(role => 
+  return roles.some(role =>
     ROLE_PERMISSIONS[role as AppRole]?.[permission] ?? false
   );
 }
 
-/**
- * Get all permissions for a set of roles (combines permissions from all roles)
- */
 export function getPermissions(roles: string[]) {
   const defaultPerms = {
-    canAccessAdmin: false,
-    canBanPlayers: false,
-    canKickPlayers: false,
-    canWarnPlayers: false,
-    canManageRoles: false,
-    canViewLogs: false,
-    canManageServer: false,
-    canEditConfig: false,
+    canAccessAdmin: false, canBanPlayers: false, canKickPlayers: false,
+    canWarnPlayers: false, canManageRoles: false, canViewLogs: false,
+    canManageServer: false, canEditConfig: false,
   };
 
   return roles.reduce((perms, role) => {
@@ -257,17 +238,3 @@ export function getPermissions(roles: string[]) {
     return perms;
   }, defaultPerms);
 }
-
-// ============================================
-// DISCORD SERVER CONFIG
-// ============================================
-export const DISCORD_CONFIG = {
-  // Your Discord server (guild) ID
-  GUILD_ID: 'YOUR_DISCORD_SERVER_ID',
-  
-  // Discord invite link
-  INVITE_URL: 'https://discord.gg/norulespvp',
-  
-  // OAuth scopes needed
-  OAUTH_SCOPES: ['identify', 'guilds', 'guilds.members.read'],
-};

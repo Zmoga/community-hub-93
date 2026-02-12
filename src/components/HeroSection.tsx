@@ -66,6 +66,9 @@ const HeroSection = () => {
             <span className="text-sm font-medium text-muted-foreground">
               {loading ? 'Connecting...' : online ? 'Server Online' : 'Demo Mode'}
             </span>
+            <span className="text-xs text-muted-foreground/60 font-mono">
+              — {FIVEM_CONFIG.SERVER_CODE}
+            </span>
           </div>
 
           {/* Main Title */}

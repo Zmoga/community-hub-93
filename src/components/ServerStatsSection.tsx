@@ -1,5 +1,5 @@
 import { usePlayerCount } from "@/hooks/usePlayerCount";
-import { FIVEM_CONFIG } from "@/config/fivem.config";
+import { FIVEM_CONFIG } from "@/config/server.config";
 import { Activity, Users, Clock, TrendingUp, Server, Wifi } from "lucide-react";
 
 const ServerStatsSection = () => {

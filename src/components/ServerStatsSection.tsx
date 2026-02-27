@@ -1,5 +1,6 @@
 import { usePlayerCount } from "@/hooks/usePlayerCount";
-import { FIVEM_CONFIG } from "@/config/fivem.config";
+import { useServerStats } from "@/hooks/useServerStats";
+import { FIVEM_CONFIG } from "@/config/config";
 import { Activity, Users, Clock, TrendingUp, Server, Wifi } from "lucide-react";
 
 const ServerStatsSection = () => {
@@ -8,58 +9,52 @@ const ServerStatsSection = () => {
     FIVEM_CONFIG.REFRESH_INTERVAL
   );
 
-  // These would ideally come from a backend API tracking real stats
-  const uptimePercent = 99.8;
-  const avgPlayersMonth = 64;
-  const peakPlayersMonth = 118;
-  const totalUniqueMonth = 2431;
-  const avgSessionLength = "2h 14m";
-  const daysOnline = 28;
+  const { stats, summary, loading } = useServerStats();
 
-  const stats = [
+  const statCards = [
     {
       icon: Activity,
       label: "Uptime This Month",
-      value: `${uptimePercent}%`,
-      sub: `${daysOnline}/30 days online`,
-      color: uptimePercent >= 99 ? "text-green-400" : uptimePercent >= 95 ? "text-amber-400" : "text-destructive",
-      barPercent: uptimePercent,
-      barColor: uptimePercent >= 99 ? "bg-green-500" : uptimePercent >= 95 ? "bg-amber-500" : "bg-destructive",
+      value: `${summary.uptimePct}%`,
+      sub: `${summary.daysOnline}/${summary.totalDays || 30} days online`,
+      color: summary.uptimePct >= 99 ? "text-green-400" : summary.uptimePct >= 95 ? "text-amber-400" : "text-destructive",
+      barPercent: summary.uptimePct,
+      barColor: summary.uptimePct >= 99 ? "bg-green-500" : summary.uptimePct >= 95 ? "bg-amber-500" : "bg-destructive",
     },
     {
       icon: Users,
       label: "Avg. Players",
-      value: avgPlayersMonth.toString(),
+      value: summary.avgPlayers.toString(),
       sub: `of ${maxPlayers} slots`,
       color: "text-primary",
-      barPercent: (avgPlayersMonth / maxPlayers) * 100,
+      barPercent: (summary.avgPlayers / maxPlayers) * 100,
       barColor: "bg-primary",
     },
     {
       icon: TrendingUp,
       label: "Peak Players",
-      value: peakPlayersMonth.toString(),
+      value: summary.peakPlayers.toString(),
       sub: "this month",
       color: "text-amber-400",
-      barPercent: (peakPlayersMonth / maxPlayers) * 100,
+      barPercent: (summary.peakPlayers / maxPlayers) * 100,
       barColor: "bg-amber-500",
     },
     {
       icon: Server,
-      label: "Unique Players",
-      value: totalUniqueMonth.toLocaleString(),
-      sub: "this month",
+      label: "Total Snapshots",
+      value: stats.reduce((a, s) => a + s.total_snapshots, 0).toLocaleString(),
+      sub: "data points recorded",
       color: "text-purple-400",
-      barPercent: 78,
+      barPercent: Math.min(stats.reduce((a, s) => a + s.total_snapshots, 0) / 100, 100),
       barColor: "bg-purple-500",
     },
     {
       icon: Clock,
-      label: "Avg. Session",
-      value: avgSessionLength,
-      sub: "per player",
+      label: "Days Tracked",
+      value: summary.totalDays.toString(),
+      sub: "with data",
       color: "text-blue-400",
-      barPercent: 65,
+      barPercent: (summary.totalDays / 30) * 100,
       barColor: "bg-blue-500",
     },
     {
@@ -85,13 +80,13 @@ const ServerStatsSection = () => {
             Server <span className="text-primary text-glow">Stats</span>
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Real-time server performance and player statistics for this month.
+            {loading ? "Loading real-time stats…" : "Live server performance tracked automatically."}
           </p>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-5xl mx-auto">
-          {stats.map((stat, i) => (
+          {statCards.map((stat, i) => (
             <div
               key={i}
               className="glass rounded-xl p-5 hover:border-primary/30 transition-all duration-300 group"
@@ -120,13 +115,13 @@ const ServerStatsSection = () => {
           ))}
         </div>
 
-        {/* Monthly summary bar */}
+        {/* 30-day uptime bar from real data */}
         <div className="mt-10 glass rounded-xl p-5 max-w-5xl mx-auto">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm text-muted-foreground">
-                Server has been <span className="text-green-400 font-semibold">{uptimePercent}% operational</span> this month
+                Server has been <span className="text-green-400 font-semibold">{summary.uptimePct}% operational</span> this month
               </span>
             </div>
             <div className="flex items-center gap-6 text-xs text-muted-foreground">
@@ -137,25 +132,35 @@ const ServerStatsSection = () => {
                 <span className="w-2 h-2 rounded-full bg-amber-500" /> Degraded
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-destructive" /> Downtime
+                <span className="w-2 h-2 rounded-full bg-destructive" /> No Data
               </span>
             </div>
           </div>
 
-          {/* 30-day uptime bar */}
+          {/* Real 30-day bar */}
           <div className="mt-4 flex gap-0.5">
             {Array.from({ length: 30 }, (_, i) => {
-              // Simulate: mostly green, a couple amber, maybe one red
-              const status = i === 14 ? 'amber' : i === 22 ? 'red' : 'green';
+              const date = new Date();
+              date.setDate(date.getDate() - (29 - i));
+              const dateStr = date.toISOString().slice(0, 10);
+              const dayStat = stats.find(s => s.date === dateStr);
+
+              const status = !dayStat
+                ? 'none'
+                : dayStat.uptime_pct >= 99 ? 'green'
+                : dayStat.uptime_pct >= 80 ? 'amber'
+                : 'red';
+
               return (
                 <div
                   key={i}
                   className={`flex-1 h-6 rounded-sm transition-colors hover:opacity-80 cursor-default ${
                     status === 'green' ? 'bg-green-500/70 hover:bg-green-500' :
                     status === 'amber' ? 'bg-amber-500/70 hover:bg-amber-500' :
-                    'bg-destructive/70 hover:bg-destructive'
+                    status === 'red' ? 'bg-destructive/70 hover:bg-destructive' :
+                    'bg-muted/30 hover:bg-muted/50'
                   }`}
-                  title={`Day ${i + 1}: ${status === 'green' ? '100%' : status === 'amber' ? '98.5%' : '94.2%'} uptime`}
+                  title={`${dateStr}: ${dayStat ? `${dayStat.uptime_pct}% uptime, peak ${dayStat.peak_players}` : 'No data'}`}
                 />
               );
             })}

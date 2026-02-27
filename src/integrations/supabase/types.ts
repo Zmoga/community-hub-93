@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      server_stats: {
+        Row: {
+          id: string
+          max_players: number
+          online: boolean
+          players: number
+          recorded_at: string
+          server_name: string | null
+        }
+        Insert: {
+          id?: string
+          max_players?: number
+          online?: boolean
+          players?: number
+          recorded_at?: string
+          server_name?: string | null
+        }
+        Update: {
+          id?: string
+          max_players?: number
+          online?: boolean
+          players?: number
+          recorded_at?: string
+          server_name?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

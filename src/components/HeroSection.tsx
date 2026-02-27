@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Users, Gamepad2, Copy, Check } from "lucide-react";
 import { usePlayerCount } from "@/hooks/usePlayerCount";
-import { FIVEM_CONFIG, DISCORD_AUTH_CONFIG } from "@/config/fivem.config";
+import { FIVEM_CONFIG, DISCORD_AUTH_CONFIG } from "@/config/config";
 
 const HeroSection = () => {
   const { players, maxPlayers, online, loading } = usePlayerCount(

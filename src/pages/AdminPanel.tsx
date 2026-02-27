@@ -18,8 +18,7 @@ import {
   FileText,
   Loader2
 } from 'lucide-react';
-import { ROLE_DISPLAY } from '@/config/web.config';
-import { ROLES_ORDER, type AppRole } from '@/config/fivem.config';
+import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from '@/config/config';
 import { BanPlayerDialog, KickPlayerDialog, WarnPlayerDialog, UnbanPlayerDialog } from '@/components/admin/ModerationDialogs';
 import { RoleManager } from '@/components/admin/RoleManager';
 import { supabase } from '@/integrations/supabase/client';

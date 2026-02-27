@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { FIVEM_CONFIG } from '@/config/server.config';
+import { FIVEM_CONFIG } from '@/config/fivem.config';
 
 interface PlayerCountData {
   players: number;

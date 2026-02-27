@@ -15,7 +15,8 @@ import {
   LogOut,
   Loader2
 } from "lucide-react";
-import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from "@/config/server.config";
+import { ROLE_DISPLAY } from "@/config/web.config";
+import { ROLES_ORDER, type AppRole } from "@/config/fivem.config";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);

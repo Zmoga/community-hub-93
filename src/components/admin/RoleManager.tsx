@@ -30,7 +30,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Shield, Plus, Trash2, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { ROLE_DISPLAY, ROLES_ORDER, type AppRole } from '@/config/server.config';
+import { ROLE_DISPLAY } from '@/config/web.config';
+import { ROLES_ORDER, type AppRole } from '@/config/fivem.config';
 
 interface RoleAssignment {
   id: string;
